@@ -1,0 +1,25 @@
+[project]
+name = "joyst"
+version = "0.1.0"
+description = "Journey Over Your Saved Titles - Data Platform"
+requires-python = ">=3.13"
+
+[tool.uv]
+# uv-specific config (optional)
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["spark_jobs", "pipelines", "dags"]
+exclude = ["terraform", "data", "notebooks"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+exclude = ["build", ".venv"]
+lint.select = ["E", "F", "I", "UP"]
+format = "default"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = ["tests"]

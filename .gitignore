@@ -1,0 +1,15 @@
+# Terraform
+.terraform
+*.plan
+
+# OS related
+.DS_Store
+
+# IDE related
+.idea
+*.iml
+.vscode
+
+# Python
+.venv
+*.egg-info
