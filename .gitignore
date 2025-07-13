@@ -67,6 +67,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# IA Stuff
+.claude
+
 # Spark
 spark-warehouse/
 derby.log
