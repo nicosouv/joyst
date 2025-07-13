@@ -7,16 +7,14 @@ terraform {
 }
 
 resource "docker_image" "spark" {
-  name = "bitnami/spark:3.5"
+  name = "ghcr.io/nicosouv/joyst-spark:latest"
 }
 
 resource "docker_container" "spark_master" {
   name  = "joyst-spark-master-${var.env}"
   image = docker_image.spark.name
 
-  env = [
-    "SPARK_MODE=master"
-  ]
+  command = ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
 
   ports {
     internal = 8080
@@ -39,9 +37,13 @@ resource "docker_container" "spark_worker" {
   name  = "joyst-spark-worker-1-${var.env}"
   image = docker_image.spark.name
 
+  command = [
+    "/opt/spark/bin/spark-class", 
+    "org.apache.spark.deploy.worker.Worker", 
+    "spark://joyst-spark-master-${var.env}:7077"
+  ]
+
   env = [
-    "SPARK_MODE=worker",
-    "SPARK_MASTER_URL=spark://joyst-spark-master-${var.env}:7077",
     "SPARK_WORKER_MEMORY=4g"
   ]
 

@@ -1,0 +1,8 @@
+{
+  "steam_api_key": "YOUR_STEAM_API_KEY",
+  "steam_id": "YOUR_STEAM_ID_64_BIT",
+  "output_path": "data/steam_account",
+  "spark_master": "spark://localhost:7077",
+  "spark_app_name": "steam-account-processor",
+  "spark_shuffle_partitions": "4"
+}

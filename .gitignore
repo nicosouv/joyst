@@ -1,15 +1,79 @@
 # Terraform
-.terraform
-*.plan
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfplan
+.terraform.lock.hcl
+terraform.tfstate.d/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Data files
+data/
+*.csv
+*.json
+*.parquet
+logs/
+
+# Docker
+.dockerignore
 
 # OS related
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # IDE related
-.idea
+.idea/
 *.iml
-.vscode
+.vscode/
+*.swp
+*.swo
 
-# Python
-.venv
-*.egg-info
+# Spark
+spark-warehouse/
+derby.log
+metastore_db/
+
+# Configuration files with secrets
+config.json
+.env
+*.key
+*.pem
