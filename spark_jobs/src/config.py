@@ -1,13 +1,13 @@
-import os
 import json
-from typing import Dict, Any, Optional
+import os
 from pathlib import Path
+from typing import Any
 
 
 class Config:
     """Configuration manager with environment variable fallback"""
 
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: str | None = None):
         if config_file is None:
             # Look for config.json in project root (two levels up from spark_jobs/src/)
             project_root = Path(__file__).parent.parent.parent
@@ -16,22 +16,22 @@ class Config:
             self.config_file = config_file
         self.config_data = self._load_config()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load configuration from file if it exists"""
         config_path = Path(self.config_file)
 
         if config_path.exists():
             try:
-                with open(config_path, "r") as f:
+                with open(config_path) as f:
                     return json.load(f)
-            except (json.JSONDecodeError, IOError) as e:
+            except (OSError, json.JSONDecodeError) as e:
                 print(f"Warning: Could not load config file {self.config_file}: {e}")
                 return {}
         else:
             print(f"Config file {self.config_file} not found, using environment variables only")
             return {}
 
-    def get(self, key: str, default: Any = None, env_var: Optional[str] = None) -> Any:
+    def get(self, key: str, default: Any = None, env_var: str | None = None) -> Any:
         """
         Get configuration value with environment variable fallback
 
@@ -53,7 +53,7 @@ class Config:
         # Return default
         return default
 
-    def get_steam_config(self) -> Dict[str, str]:
+    def get_steam_config(self) -> dict[str, str]:
         """Get Steam API configuration"""
         return {
             "api_key": self.get("steam_api_key", env_var="STEAM_API_KEY"),
@@ -63,7 +63,7 @@ class Config:
             ),
         }
 
-    def get_spark_config(self) -> Dict[str, str]:
+    def get_spark_config(self) -> dict[str, str]:
         """Get Spark configuration"""
         return {
             "master": self.get("spark_master", "spark://localhost:7077", env_var="SPARK_MASTER"),

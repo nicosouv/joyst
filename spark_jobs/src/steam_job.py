@@ -1,9 +1,10 @@
+from typing import Any
+
 import requests
-from typing import Dict, Any
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from base import get_spark_session
 from config import Config
+from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 
 class SteamAPIClient:
@@ -12,14 +13,14 @@ class SteamAPIClient:
         self.steam_id = steam_id
         self.base_url = "https://api.steampowered.com"
 
-    def get_player_summaries(self) -> Dict[str, Any]:
+    def get_player_summaries(self) -> dict[str, Any]:
         """Get basic player profile information"""
         url = f"{self.base_url}/ISteamUser/GetPlayerSummaries/v0002/"
         params = {"key": self.api_key, "steamids": self.steam_id, "format": "json"}
         response = requests.get(url, params=params)
         return response.json()
 
-    def get_owned_games(self) -> Dict[str, Any]:
+    def get_owned_games(self) -> dict[str, Any]:
         """Get list of games owned by the player"""
         url = f"{self.base_url}/IPlayerService/GetOwnedGames/v0001/"
         params = {
@@ -32,21 +33,21 @@ class SteamAPIClient:
         response = requests.get(url, params=params)
         return response.json()
 
-    def get_recently_played_games(self) -> Dict[str, Any]:
+    def get_recently_played_games(self) -> dict[str, Any]:
         """Get recently played games"""
         url = f"{self.base_url}/IPlayerService/GetRecentlyPlayedGames/v0001/"
         params = {"key": self.api_key, "steamid": self.steam_id, "format": "json", "count": 100}
         response = requests.get(url, params=params)
         return response.json()
 
-    def get_player_achievements(self, app_id: int) -> Dict[str, Any]:
+    def get_player_achievements(self, app_id: int) -> dict[str, Any]:
         """Get player achievements for a specific game"""
         url = f"{self.base_url}/ISteamUserStats/GetPlayerAchievements/v0001/"
         params = {"key": self.api_key, "steamid": self.steam_id, "appid": app_id, "format": "json"}
         response = requests.get(url, params=params)
         return response.json()
 
-    def get_user_stats_for_game(self, app_id: int) -> Dict[str, Any]:
+    def get_user_stats_for_game(self, app_id: int) -> dict[str, Any]:
         """Get user statistics for a specific game"""
         url = f"{self.base_url}/ISteamUserStats/GetUserStatsForGame/v0002/"
         params = {"key": self.api_key, "steamid": self.steam_id, "appid": app_id, "format": "json"}
@@ -54,7 +55,7 @@ class SteamAPIClient:
         return response.json()
 
 
-def fetch_steam_data(api_key: str, steam_id: str) -> Dict[str, Any]:
+def fetch_steam_data(api_key: str, steam_id: str) -> dict[str, Any]:
     """Fetch comprehensive Steam account data"""
     client = SteamAPIClient(api_key, steam_id)
 
@@ -68,8 +69,8 @@ def fetch_steam_data(api_key: str, steam_id: str) -> Dict[str, Any]:
 
 
 def create_steam_dataframes(
-    spark: SparkSession, steam_data: Dict[str, Any]
-) -> Dict[str, DataFrame]:
+    spark: SparkSession, steam_data: dict[str, Any]
+) -> dict[str, DataFrame]:
     """Convert Steam API data to Spark DataFrames"""
 
     # Player summary schema

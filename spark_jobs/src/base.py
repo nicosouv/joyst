@@ -1,5 +1,5 @@
-from pyspark.sql import SparkSession
 from config import Config
+from pyspark.sql import SparkSession
 
 
 def get_spark_session(app_name: str = "joyst", config: Config = None) -> SparkSession:

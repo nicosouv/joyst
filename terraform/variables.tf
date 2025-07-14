@@ -25,9 +25,11 @@ variable "prefect_ui_port" {
   default = 4200
 }
 variable "spark_ui_port" {
+  type    = number
   default = 8080
 }
 
 variable "spark_rpc_port" {
+  type    = number
   default = 7077
 }
