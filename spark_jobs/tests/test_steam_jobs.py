@@ -6,8 +6,8 @@ def test_basic_functionality():
 def test_import_modules():
     """Test that we can import our modules"""
     try:
-        import sys
         import os
+        import sys
 
         # Add the project root to Python path
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
