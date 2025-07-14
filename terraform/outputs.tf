@@ -16,10 +16,10 @@ output "spark_master_url" {
 
 output "service_urls" {
   value = {
-    metabase    = module.metabase.metabase_url
-    spark_ui    = "http://localhost:${var.spark_ui_port}"
-    clickhouse  = module.clickhouse.clickhouse_http_url
-    postgres    = "postgresql://localhost:${var.postgres_port}"
-    prefect     = "http://localhost:${var.prefect_ui_port}"
+    metabase   = module.metabase.metabase_url
+    spark_ui   = "http://localhost:${var.spark_ui_port}"
+    clickhouse = module.clickhouse.clickhouse_http_url
+    postgres   = "postgresql://localhost:${var.postgres_port}"
+    prefect    = "http://localhost:${var.prefect_ui_port}"
   }
 }

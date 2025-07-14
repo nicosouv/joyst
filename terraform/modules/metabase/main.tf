@@ -39,10 +39,10 @@ resource "docker_container" "metabase" {
 
   # Health check
   healthcheck {
-    test     = ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-    interval = "30s"
-    timeout  = "10s"
-    retries  = 5
+    test         = ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+    interval     = "30s"
+    timeout      = "10s"
+    retries      = 5
     start_period = "60s"
   }
 
