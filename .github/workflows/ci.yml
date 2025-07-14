@@ -74,4 +74,4 @@ jobs:
       run: uv run ruff check .
     
     - name: Run Tests
-      run: uv run pytest spark_jobs/tests/ -v
+      run: uv run python -m pytest spark_jobs/tests/ -v

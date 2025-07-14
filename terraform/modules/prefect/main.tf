@@ -10,8 +10,8 @@ resource "docker_image" "prefect" {
 }
 
 resource "docker_container" "prefect_server" {
-  name  = "joyst-prefect-${var.env}"
-  image = docker_image.prefect.name
+  name    = "joyst-prefect-${var.env}"
+  image   = docker_image.prefect.name
   restart = "unless-stopped"
 
   ports {
