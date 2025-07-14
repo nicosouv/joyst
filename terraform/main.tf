@@ -58,3 +58,17 @@ module "clickhouse" {
     docker = docker
   }
 }
+
+module "metabase" {
+  source                     = "./modules/metabase"
+  env                        = var.env
+  network_name               = module.network.network_name
+  port                       = var.metabase_port
+  metabase_secret_key        = var.metabase_secret_key
+  postgres_container_name    = module.postgres.postgres_container_name
+  clickhouse_container_name  = module.clickhouse.clickhouse_container_name
+
+  providers = {
+    docker = docker
+  }
+}

@@ -55,6 +55,9 @@ terraform/clickhouse-data/
 # Docker
 .dockerignore
 
+# Git
+!.releaserc.json
+
 # OS related
 .DS_Store
 .DS_Store?

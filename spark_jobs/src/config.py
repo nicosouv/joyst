@@ -74,3 +74,23 @@ class Config:
                 "spark_shuffle_partitions", "4", env_var="SPARK_SHUFFLE_PARTITIONS"
             ),
         }
+
+    def get_postgres_config(self) -> dict[str, str]:
+        """Get PostgreSQL configuration"""
+        return {
+            "host": self.get("postgres_host", "localhost", env_var="POSTGRES_HOST"),
+            "port": self.get("postgres_port", "5432", env_var="POSTGRES_PORT"),
+            "database": self.get("postgres_db", "joyst_dw", env_var="POSTGRES_DB"),
+            "user": self.get("postgres_user", "admin", env_var="POSTGRES_USER"),
+            "password": self.get("postgres_password", env_var="POSTGRES_PASSWORD"),
+        }
+
+    def get_clickhouse_config(self) -> dict[str, str]:
+        """Get ClickHouse configuration"""
+        return {
+            "host": self.get("clickhouse_host", "localhost", env_var="CLICKHOUSE_HOST"),
+            "port": self.get("clickhouse_port", "9000", env_var="CLICKHOUSE_PORT"),
+            "database": self.get("clickhouse_db", "gaming_analytics", env_var="CLICKHOUSE_DB"),
+            "user": self.get("clickhouse_user", "admin", env_var="CLICKHOUSE_USER"),
+            "password": self.get("clickhouse_password", env_var="CLICKHOUSE_PASSWORD"),
+        }
