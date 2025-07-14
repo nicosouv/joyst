@@ -3,6 +3,7 @@ from typing import Any
 import requests
 from base import get_spark_session
 from config import Config
+from database_writers import write_to_databases
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
@@ -137,7 +138,22 @@ def process_steam_account_data(config_file: str = None) -> None:
             "Steam API key and Steam ID must be provided via config file or environment variables"
         )
 
-    spark = get_spark_session("steam-account-processor", config)
+    # Get version from git tag
+    import subprocess
+
+    try:
+        version = (
+            subprocess.check_output(
+                ["git", "describe", "--tags", "--abbrev=0"], stderr=subprocess.DEVNULL
+            )
+            .decode()
+            .strip()
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        version = "dev"
+
+    app_name = f"steam-account-processor-{version}"
+    spark = get_spark_session(app_name, config)
 
     # Fetch data from Steam API
     print("Fetching Steam account data...")
@@ -147,12 +163,19 @@ def process_steam_account_data(config_file: str = None) -> None:
     print("Creating Spark DataFrames...")
     dataframes = create_steam_dataframes(spark, steam_data)
 
-    # Save DataFrames
+    # Display DataFrames for debugging
     for name, df in dataframes.items():
         print(f"Processing {name}...")
         df.show(10)
+
+    # Write to databases
+    print("Writing data to PostgreSQL and ClickHouse...")
+    write_to_databases(dataframes, config, steam_config["steam_id"])
+
+    # Also save as JSON for backup/debugging
+    for name, df in dataframes.items():
         df.coalesce(1).write.mode("overwrite").json(f"{steam_config['output_path']}/{name}")
-        print(f"Saved {name} to {steam_config['output_path']}/{name}")
+        print(f"Backup saved: {name} to {steam_config['output_path']}/{name}")
 
     spark.stop()
 

@@ -1,191 +1,364 @@
 # JOYST - Journey Over Your Saved Titles
 
-A data platform for analyzing Steam gaming data using Apache Spark and modern data engineering practices.
+A comprehensive gaming analytics platform that extracts, processes, and visualizes Steam gaming data using modern data engineering practices and machine learning-ready infrastructure.
 
 ## Overview
 
-JOYST is a comprehensive data platform that extracts, processes, and analyzes Steam gaming data. It uses Apache Spark for distributed processing and provides insights into gaming patterns, library statistics, and player behavior.
+JOYST is an end-to-end data platform for gaming analytics that combines:
+- **Real-time data extraction** from Steam Web API
+- **Distributed processing** with Apache Spark
+- **Dual-database architecture** for operational and analytical workloads
+- **Interactive dashboards** for gaming insights
+- **ML-ready data warehouse** for game recommendations
 
 ## Architecture
 
-- **Spark Jobs**: Python-based data processing jobs for Steam API data extraction
-- **Infrastructure**: Docker-containerized Spark cluster managed with Terraform
-- **Data Pipeline**: Automated data extraction from Steam Web API
-- **Storage**: JSON-based data storage with schema evolution support
+```
+Steam API → Spark Processing → PostgreSQL (Operational)
+                            → ClickHouse (Analytics) → Metabase Dashboards
+                            → JSON (Backup)
+```
+
+### Core Components:
+- **🎮 Steam API Integration**: Real-time player and game data extraction
+- **⚡ Apache Spark**: Distributed data processing and transformation
+- **🐘 PostgreSQL**: Operational data store with ACID transactions
+- **🔢 ClickHouse**: Columnar analytics warehouse optimized for ML
+- **📊 Metabase**: Interactive dashboards and visualizations
+- **🚀 Docker + Terraform**: Infrastructure as Code deployment
 
 ## Prerequisites
 
 - Docker and Docker Compose
-- Terraform
+- Terraform >= 1.0
 - Python 3.10+
 - Steam API Key (get from [Steam Web API](https://steamcommunity.com/dev/apikey))
+- GitHub Container Registry access (for custom Spark image)
 
 ## Quick Start
 
-### 1. Setup Infrastructure
+### 1. Setup Development Environment
 
 ```bash
-# Start the infrastructure
-cd terraform
-terraform init
-terraform apply -var-file="environments/local/local.tfvars"
+# Clone and setup
+git clone <repository>
+cd joyst
+make setup  # Installs dependencies and initializes Terraform
 ```
 
 ### 2. Configure Steam API
 
-Create `config.json` in the project root:
+Update `config.json` with your Steam credentials:
 
 ```json
 {
   "steam_api_key": "YOUR_STEAM_API_KEY",
   "steam_id": "YOUR_STEAM_ID_64_BIT",
-  "output_path": "data/steam_account"
+  "output_path": "data/steam_account",
+  "postgres_host": "localhost",
+  "postgres_port": "5432",
+  "postgres_db": "joyst_dw",
+  "postgres_user": "admin",
+  "postgres_password": "admin",
+  "clickhouse_host": "localhost",
+  "clickhouse_port": "9000",
+  "clickhouse_db": "gaming_analytics",
+  "clickhouse_user": "admin",
+  "clickhouse_password": "admin123"
 }
 ```
 
-Or use environment variables:
+### 3. Deploy Complete Infrastructure
 
 ```bash
-export STEAM_API_KEY="your_api_key"
-export STEAM_ID="your_steam_id"
+# Deploy all services (PostgreSQL, ClickHouse, Spark, Metabase)
+make infra-up
+
+# Check all service URLs
+make urls
 ```
 
-### 3. Run Spark Jobs
+### 4. Build and Run Data Pipeline
 
 ```bash
-# Submit job to Dockerized Spark cluster
-docker run --rm \
-  --network joyst-network-local \
-  -v $(pwd):/opt/spark/work-dir \
-  ghcr.io/nicosouv/joyst-spark:latest \
-  spark-submit --master spark://joyst-spark-master-local:7077 spark_jobs/src/steam_job.py
+# Build custom Spark image
+make docker-build
+
+# Run Steam data extraction and processing
+make spark-submit
+```
+
+### 5. Access Dashboards
+
+```bash
+# View service URLs
+make urls
+
+# Open Metabase for dashboards
+open http://localhost:3000
 ```
 
 ## Project Structure
 
 ```
-.
-├── .infrastructure
-│ ├── build.sh       # Container build script
-│ ├── deploy.sh
-│ └── docker         # Docker configurations
-├── dags             # Prefect dags
-├── spark_jobs       # Spark job implementations
-│ ├── src            # Data processing job
-│ └── tests
-├── sql
-└── terraform        # Infrastructure as Code
+├── .infrastructure/          # Build and deployment
+│   ├── build.sh             # Docker image build script  
+│   └── docker/
+│       └── spark.Dockerfile # Custom Spark image
+├── .github/workflows/       # CI/CD pipelines
+├── spark_jobs/              # Spark job implementations
+│   ├── src/
+│   │   ├── steam_job.py     # Main Steam data processor
+│   │   ├── database_writers.py # PostgreSQL & ClickHouse writers
+│   │   ├── config.py        # Configuration management
+│   │   └── base.py          # Spark session utilities
+│   └── tests/               # Unit tests
+├── sql/                     # Database schemas
+│   ├── postgres/            # PostgreSQL schemas
+│   │   ├── 01_steam_schema.sql
+│   │   └── 02_seed_data.sql
+│   └── clickhouse/          # ClickHouse schemas  
+│       ├── 03_clickhouse_schema.sql
+│       └── 04_clickhouse_seed_data.sql
+├── terraform/               # Infrastructure as Code
+│   ├── modules/
+│   │   ├── network/         # Docker networking
+│   │   ├── postgres/        # PostgreSQL deployment
+│   │   ├── clickhouse/      # ClickHouse deployment  
+│   │   ├── spark/           # Spark cluster
+│   │   ├── metabase/        # Dashboard service
+│   │   └── prefect/         # Workflow orchestration
+│   └── environments/
+│       └── local/           # Local development config
+├── config.json             # Application configuration
+└── Makefile                 # Development commands
 ```
+
+## Services & Access Points
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| 📊 **Metabase** | http://localhost:3000 | Interactive dashboards and analytics |
+| ⚡ **Spark Master UI** | http://localhost:8080 | Spark cluster monitoring |
+| 🔢 **ClickHouse HTTP** | http://localhost:8123 | Analytics database interface |
+| 🐘 **PostgreSQL** | localhost:5432 | Operational database |
+| 🎯 **Prefect UI** | http://localhost:4200 | Workflow orchestration |
+
+## Data Architecture
+
+### PostgreSQL (Operational Store)
+- **Purpose**: ACID transactions, referential integrity
+- **Schema**: Normalized relational model
+- **Tables**: `steam_players`, `steam_games`, `steam_owned_games`
+- **Use Cases**: Data consistency, operational queries
+
+### ClickHouse (Analytics Warehouse)  
+- **Purpose**: Fast analytics, ML feature store
+- **Schema**: Star schema with dimension and fact tables
+- **Tables**: `dim_players`, `dim_games`, `fact_gaming_sessions`
+- **Use Cases**: Analytics, reporting, ML model training
 
 ## Development
 
-### Building Docker Images
+### Available Make Commands
 
 ```bash
-# Build and push to GitHub Container Registry
-CR_PAT=your_github_token .infrastructure/build.sh spark
-```
-
-### Running Tests
-
-```bash
-# Install dependencies
-pip install -e .
-
-# Run tests
-pytest spark_jobs/tests/
+make help          # Show all available commands
+make setup         # Complete development environment setup
+make install       # Install Python dependencies
+make test          # Run test suite
+make lint          # Run code linting
+make format        # Format code
+make docker-build  # Build custom Spark image
+make infra-up      # Deploy complete infrastructure
+make infra-down    # Destroy infrastructure
+make spark-submit  # Run Spark data processing job
+make urls          # Show all service URLs
+make clean         # Clean temporary files
 ```
 
 ### Configuration
 
-The application supports configuration via:
-
-1. **Environment variables** (highest priority)
+Configuration priority (highest to lowest):
+1. **Environment variables** 
 2. **Config file** (`config.json`)
-3. **Default values** (lowest priority)
+3. **Default values**
 
-Available configuration options:
+Key configuration options:
 
 | Environment Variable | Config File Key | Default | Description |
 |---------------------|----------------|---------|-------------|
 | `STEAM_API_KEY` | `steam_api_key` | - | Steam Web API key |
 | `STEAM_ID` | `steam_id` | - | Steam user ID (64-bit) |
-| `STEAM_OUTPUT_PATH` | `output_path` | `data/steam_account` | Output directory |
+| `POSTGRES_HOST` | `postgres_host` | `localhost` | PostgreSQL host |
+| `CLICKHOUSE_HOST` | `clickhouse_host` | `localhost` | ClickHouse host |
 | `SPARK_MASTER` | `spark_master` | `spark://localhost:7077` | Spark master URL |
-| `SPARK_APP_NAME` | `spark_app_name` | `steam-account-processor` | Application name |
 
-## Data Sources
+## Data Pipeline
 
-### Steam Web API
+### Steam Web API Integration
 
-The platform extracts data from the following Steam API endpoints:
+The platform extracts comprehensive gaming data:
 
-- **Player Summaries**: Basic profile information
+- **Player Summaries**: Profile information, creation dates, activity status
 - **Owned Games**: Complete game library with playtime statistics
-- **Recently Played Games**: Recent gaming activity
-- **Player Achievements**: Game-specific achievements (planned)
-- **User Statistics**: Detailed game statistics (planned)
+- **Recently Played Games**: Recent gaming activity and session data
+- **Game Metadata**: Titles, images, categories, and playtime metrics
+
+### Data Processing Flow
+
+1. **Extract**: Steam API → Raw JSON data
+2. **Transform**: Spark DataFrames → Structured schemas  
+3. **Load**: 
+   - PostgreSQL → Operational data (OLTP)
+   - ClickHouse → Analytics data (OLAP)
+   - JSON → Backup/debugging
+
+### ML Features Ready
+
+The ClickHouse warehouse includes ML-ready features:
+- **Player behavior patterns**: Playtime, preferences, session duration
+- **Game similarity metrics**: For collaborative filtering
+- **Time-series data**: Seasonal patterns, trends
+- **Feature engineering tables**: Pre-computed ML features
+
+## Dashboards & Analytics
+
+### Metabase Setup
+
+1. **Access**: http://localhost:3000
+2. **Add PostgreSQL datasource**:
+   - Host: `localhost:5432`
+   - Database: `joyst_dw`
+   - User: `admin` / Password: `admin`
+
+3. **Add ClickHouse datasource**:
+   - Host: `localhost:8123` 
+   - Database: `gaming_analytics`
+   - User: `admin` / Password: `admin123`
+
+### Dashboard Ideas
+
+**Gaming Analytics**:
+- Player activity timelines
+- Game popularity rankings  
+- Playtime distribution analysis
+- Gaming session patterns
+
+**ML Insights**:
+- Player clustering and segmentation
+- Game recommendation accuracy
+- Seasonal gaming trends
+- Player lifecycle analysis
 
 ## Infrastructure
 
-### Local Development
+### Local Environment Components
 
-The local environment includes:
-
-- **Spark Master**: Web UI on port 8080
-- **Spark Worker**: Single worker node
-- **PostgreSQL**: Metadata storage
-- **Prefect**: Workflow orchestration (planned)
+| Component | Purpose | Port |
+|-----------|---------|------|
+| **Spark Master** | Distributed processing coordinator | 8080 |
+| **Spark Worker** | Processing node | - |
+| **PostgreSQL** | Operational database | 5432 |
+| **ClickHouse** | Analytics warehouse | 8123, 9000 |
+| **Metabase** | Dashboard and BI tool | 3000 |
+| **Prefect** | Workflow orchestration | 4200 |
 
 ### Terraform Modules
 
-- `network`: Docker network configuration
-- `postgres`: PostgreSQL database
-- `spark`: Spark cluster (master + worker)
-- `prefect`: Workflow orchestration (planned)
+- **`network`**: Docker networking and service discovery
+- **`postgres`**: Operational database with automatic schema setup
+- **`clickhouse`**: Analytics warehouse with star schema
+- **`spark`**: Distributed processing cluster (master + worker)  
+- **`metabase`**: Dashboard service with database connections
+- **`prefect`**: Workflow orchestration (future use)
 
-## Monitoring
+## Next Steps
 
-Access the Spark Web UI at [http://localhost:8080](http://localhost:8080) to monitor job execution and cluster status.
+### Recommended Enhancements
 
-## Contributing
+1. **Machine Learning Models**:
+   - Game recommendation engine using ClickHouse features
+   - Player behavior prediction models
+   - Seasonal gaming pattern analysis
 
-1. Fork the repository
-2. Create a feature branch
-3. Make changes and add tests
-4. Run tests and ensure they pass
-5. Submit a pull request
+2. **Advanced Analytics**:
+   - Real-time streaming with Kafka
+   - Advanced Spark ML pipelines  
+   - A/B testing framework for recommendations
 
-## License
-
-This project is for personal use and learning purposes.
+3. **Monitoring & Observability**:
+   - Prometheus metrics collection
+   - Grafana monitoring dashboards
+   - Data quality checks and alerts
 
 ## Getting Your Steam ID
 
 To find your Steam ID (64-bit format):
 
-1. Go to your Steam profile
-2. Use a Steam ID converter tool like [steamidfinder.com](https://www.steamidfinder.com/)
-3. Enter your profile URL (e.g., `https://steamcommunity.com/id/classquette`)
-4. Copy the 64-bit Steam ID
+1. Visit [steamidfinder.com](https://www.steamidfinder.com/)
+2. Enter your Steam profile URL (e.g., `https://steamcommunity.com/id/classquette`)
+3. Copy the **SteamID64** value
+4. Use this value in your `config.json`
 
 ## Troubleshooting
 
 ### Common Issues
 
-**Java Version Mismatch**: Use Docker containers instead of local Spark installation.
+| Issue | Solution |
+|-------|----------|
+| **Java Version Mismatch** | Use Docker containers instead of local Spark |
+| **Database Connection Failed** | Ensure services are running: `make urls` |
+| **Steam API Rate Limits** | Check API key validity and request frequency |
+| **Permission Denied (ClickHouse data)** | Add `terraform/clickhouse-data/` to `.gitignore` |
+| **Container Network Issues** | Restart infrastructure: `make infra-down && make infra-up` |
 
-**API Key Issues**: Ensure your Steam API key is valid and not rate-limited.
-
-**Network Issues**: Check that Docker containers are on the same network.
-
-**Permission Issues**: Ensure proper file permissions for data directory.
-
-### Logs
-
-Check Spark logs in the container:
+### Useful Commands
 
 ```bash
+# Check service status
+docker ps
+
+# View service logs  
 docker logs joyst-spark-master-local
-docker logs joyst-spark-worker-1-local
+docker logs joyst-postgres-local
+docker logs joyst-clickhouse-local
+docker logs joyst-metabase-local
+
+# Restart specific service
+docker restart joyst-metabase-local
+
+# Clean and restart everything
+make infra-down && make clean && make infra-up
 ```
+
+### Development Workflow
+
+```bash
+# 1. Start development
+make setup
+
+# 2. Deploy infrastructure  
+make infra-up
+
+# 3. Make code changes
+# Edit files in spark_jobs/src/
+
+# 4. Test changes
+make test && make lint
+
+# 5. Rebuild and test pipeline
+make docker-build
+make spark-submit
+
+# 6. Check results in Metabase
+open http://localhost:3000
+```
+
+## License
+
+This project is for personal use and learning purposes.
+
+---
+
+**JOYST** - Transform your Steam gaming data into actionable insights! 🎮📊✨

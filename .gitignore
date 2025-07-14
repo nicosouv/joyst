@@ -51,9 +51,13 @@ logs/
 # Database data directories
 terraform/postgres-data/
 terraform/clickhouse-data/
+terraform/metabase-data/
 
 # Docker
 .dockerignore
+
+# Git
+!.releaserc.json
 
 # OS related
 .DS_Store

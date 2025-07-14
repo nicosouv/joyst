@@ -17,6 +17,7 @@ help:
 	@echo "  docker-push  - Push Docker image to registry"
 	@echo "  clean        - Clean up temporary files"
 	@echo "  all          - Run all checks (format, lint, test)"
+	@echo "  urls         - Show URLs for all services"
 
 # Python targets
 install:
@@ -71,7 +72,6 @@ infra-plan:
 # Spark job targets
 spark-submit:
 	docker run --rm \
-		--network joyst-network-local \
 		-v $(PWD):/opt/spark/work-dir \
 		ghcr.io/nicosouv/joyst-spark:latest \
 		spark-submit --master spark://joyst-spark-master-local:7077 spark_jobs/src/steam_job.py
@@ -89,7 +89,17 @@ clean:
 # Run all checks
 all: format-check lint test tf-fmt-check tf-validate
 
+# URLs for accessing services
+urls:
+	@echo "🚀 JOYST Services:"
+	@echo "📊 Metabase Dashboard:  http://localhost:3000"
+	@echo "⚡ Spark Master UI:     http://localhost:8080"
+	@echo "🔢 ClickHouse HTTP:     http://localhost:8123"
+	@echo "🐘 PostgreSQL:          localhost:5432"
+	@echo "🎯 Prefect UI:          http://localhost:4200"
+
 # Development setup
 setup: install tf-init
 	@echo "Development environment setup complete!"
+	@echo "Run 'make urls' to see service URLs"
 	@echo "Run 'make help' to see available commands"

@@ -63,3 +63,16 @@ variable "clickhouse_native_port" {
   description = "ClickHouse native TCP port"
   default     = 9000
 }
+
+variable "metabase_port" {
+  type        = number
+  description = "Metabase web interface port"
+  default     = 3000
+}
+
+variable "metabase_secret_key" {
+  type        = string
+  description = "Metabase encryption secret key"
+  sensitive   = true
+  default     = "joyst-metabase-secret-key-2024"
+}
