@@ -7,7 +7,7 @@ terraform {
 }
 
 resource "docker_image" "postgres" {
-  name = "postgres:15"
+  name = "postgres:17"
 }
 
 resource "docker_container" "postgres" {
@@ -26,4 +26,12 @@ resource "docker_container" "postgres" {
   networks_advanced {
     name = var.network_name
   }
+
+  volumes {
+    container_path = "/docker-entrypoint-initdb.d/"
+    host_path      = abspath("${path.root}/../sql/postgres")
+    read_only      = true
+  }
+
+  restart = "unless-stopped"
 }

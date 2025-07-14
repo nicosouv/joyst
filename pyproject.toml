@@ -28,4 +28,5 @@ select = ["E", "F", "I", "UP"]
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "-ra -q"
-testpaths = ["tests"]
+testpaths = ["spark_jobs/tests"]
+pythonpath = ["."]

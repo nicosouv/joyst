@@ -43,3 +43,18 @@ module "spark" {
     docker = docker
   }
 }
+
+module "clickhouse" {
+  source              = "./modules/clickhouse"
+  env                 = var.env
+  network_name        = module.network.network_name
+  clickhouse_user     = var.clickhouse_user
+  clickhouse_password = var.clickhouse_password
+  clickhouse_db       = var.clickhouse_db
+  http_port           = var.clickhouse_http_port
+  native_port         = var.clickhouse_native_port
+
+  providers = {
+    docker = docker
+  }
+}
