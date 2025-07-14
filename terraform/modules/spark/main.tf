@@ -38,8 +38,8 @@ resource "docker_container" "spark_worker" {
   image = docker_image.spark.name
 
   command = [
-    "/opt/spark/bin/spark-class", 
-    "org.apache.spark.deploy.worker.Worker", 
+    "/opt/spark/bin/spark-class",
+    "org.apache.spark.deploy.worker.Worker",
     "spark://joyst-spark-master-${var.env}:7077"
   ]
 
