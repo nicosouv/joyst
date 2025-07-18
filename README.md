@@ -43,7 +43,7 @@ Steam API → Spark Processing → PostgreSQL (Operational)
 # Clone and setup
 git clone <repository>
 cd joyst
-make setup  # Installs dependencies and initializes OpenTofu
+task setup  # Installs dependencies and initializes OpenTofu
 ```
 
 ### 2. Configure Steam API
@@ -72,27 +72,27 @@ Update `config.json` with your Steam credentials:
 
 ```bash
 # Deploy all services (PostgreSQL, ClickHouse, Spark, Metabase)
-make infra-up
+task infra-up
 
 # Check all service URLs
-make urls
+task urls
 ```
 
 ### 4. Build and Run Data Pipeline
 
 ```bash
 # Build custom Spark image
-make docker-build
+task docker-build
 
 # Run Steam data extraction and processing
-make spark-submit
+task spark-submit
 ```
 
 ### 5. Access Dashboards
 
 ```bash
 # View service URLs
-make urls
+task urls
 
 # Open Metabase for dashboards
 open http://localhost:3000
@@ -160,21 +160,21 @@ open http://localhost:3000
 
 ## Development
 
-### Available Make Commands
+### Available Task Commands
 
 ```bash
-make help          # Show all available commands
-make setup         # Complete development environment setup
-make install       # Install Python dependencies
-make test          # Run test suite
-make lint          # Run code linting
-make format        # Format code
-make docker-build  # Build custom Spark image
-make infra-up      # Deploy complete infrastructure
-make infra-down    # Destroy infrastructure
-make spark-submit  # Run Spark data processing job
-make urls          # Show all service URLs
-make clean         # Clean temporary files
+task               # Show all available commands
+task setup         # Complete development environment setup
+task install       # Install Python dependencies
+task test          # Run test suite
+task lint          # Run code linting
+task format        # Format code
+task docker-build  # Build custom Spark image
+task infra-up      # Deploy complete infrastructure
+task infra-down    # Destroy infrastructure
+task spark-submit  # Run Spark data processing job
+task urls          # Show all service URLs
+task clean         # Clean temporary files
 ```
 
 ### Configuration
@@ -329,27 +329,27 @@ docker logs joyst-metabase-local
 docker restart joyst-metabase-local
 
 # Clean and restart everything
-make infra-down && make clean && make infra-up
+task infra-down && task clean && task infra-up
 ```
 
 ### Development Workflow
 
 ```bash
 # 1. Start development
-make setup
+task setup
 
 # 2. Deploy infrastructure  
-make infra-up
+task infra-up
 
 # 3. Make code changes
 # Edit files in spark_jobs/src/
 
 # 4. Test changes
-make test && make lint
+task test && task lint
 
 # 5. Rebuild and test pipeline
-make docker-build
-make spark-submit
+task docker-build
+task spark-submit
 
 # 6. Check results in Metabase
 open http://localhost:3000
