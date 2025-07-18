@@ -20,16 +20,16 @@ jobs:
         terraform_version: latest
     
     - name: Terraform Format Check
-      run: terraform fmt -check -recursive
-      working-directory: terraform
+      run: tofu fmt -check -recursive
+      working-directory: tofu
     
     - name: Terraform Init
-      run: terraform init
-      working-directory: terraform
+      run: tofu init
+      working-directory: tofu
     
     - name: Terraform Validate
-      run: terraform validate
-      working-directory: terraform
+      run: tofu validate
+      working-directory: tofu
     
     - name: TFLint Setup
       uses: terraform-linters/setup-tflint@v4
@@ -38,11 +38,11 @@ jobs:
     
     - name: TFLint Init
       run: tflint --init
-      working-directory: terraform
+      working-directory: tofu
     
     - name: TFLint
       run: tflint
-      working-directory: terraform
+      working-directory: tofu
 
   python:
     name: Python Format & Lint

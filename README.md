@@ -25,12 +25,12 @@ Steam API → Spark Processing → PostgreSQL (Operational)
 - **🐘 PostgreSQL**: Operational data store with ACID transactions
 - **🔢 ClickHouse**: Columnar analytics warehouse optimized for ML
 - **📊 Metabase**: Interactive dashboards and visualizations
-- **🚀 Docker + Terraform**: Infrastructure as Code deployment
+- **🚀 Docker + OpenTofu**: Infrastructure as Code deployment
 
 ## Prerequisites
 
 - Docker and Docker Compose
-- Terraform >= 1.0
+- OpenTofu >= 1.8.0
 - Python 3.10+
 - Steam API Key (get from [Steam Web API](https://steamcommunity.com/dev/apikey))
 - GitHub Container Registry access (for custom Spark image)
@@ -43,7 +43,7 @@ Steam API → Spark Processing → PostgreSQL (Operational)
 # Clone and setup
 git clone <repository>
 cd joyst
-make setup  # Installs dependencies and initializes Terraform
+make setup  # Installs dependencies and initializes OpenTofu
 ```
 
 ### 2. Configure Steam API
@@ -120,7 +120,7 @@ open http://localhost:3000
 │   └── clickhouse/          # ClickHouse schemas  
 │       ├── 03_clickhouse_schema.sql
 │       └── 04_clickhouse_seed_data.sql
-├── terraform/               # Infrastructure as Code
+├── tofu/                    # Infrastructure as Code
 │   ├── modules/
 │   │   ├── network/         # Docker networking
 │   │   ├── postgres/        # PostgreSQL deployment
@@ -264,7 +264,7 @@ The ClickHouse warehouse includes ML-ready features:
 | **Metabase** | Dashboard and BI tool | 3000 |
 | **Prefect** | Workflow orchestration | 4200 |
 
-### Terraform Modules
+### OpenTofu Modules
 
 - **`network`**: Docker networking and service discovery
 - **`postgres`**: Operational database with automatic schema setup
@@ -310,7 +310,7 @@ To find your Steam ID (64-bit format):
 | **Java Version Mismatch** | Use Docker containers instead of local Spark |
 | **Database Connection Failed** | Ensure services are running: `make urls` |
 | **Steam API Rate Limits** | Check API key validity and request frequency |
-| **Permission Denied (ClickHouse data)** | Add `terraform/clickhouse-data/` to `.gitignore` |
+| **Permission Denied (ClickHouse data)** | Add `tofu/clickhouse-data/` to `.gitignore` |
 | **Container Network Issues** | Restart infrastructure: `make infra-down && make infra-up` |
 
 ### Useful Commands

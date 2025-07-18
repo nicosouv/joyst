@@ -16,7 +16,7 @@ Branch: \`$BRANCH_NAME\`
 Type: Feature addition (MINOR version bump)
 
 ### Changes
-$(if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then git log --oneline $CURRENT_VERSION..HEAD; else git log --oneline; fi)"
+$(if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then git log --oneline "$CURRENT_VERSION..HEAD"; else git log --oneline; fi)"
 
 elif [[ $BRANCH_NAME == fix/* ]]; then
     RELEASE_NOTES="🐛 **Bug Fix**
@@ -25,7 +25,7 @@ Branch: \`$BRANCH_NAME\`
 Type: Bug fix (PATCH version bump)
 
 ### Changes
-$(if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then git log --oneline $CURRENT_VERSION..HEAD; else git log --oneline; fi)"
+$(if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then git log --oneline "$CURRENT_VERSION..HEAD"; else git log --oneline; fi)"
 
 elif [[ $BRANCH_NAME == breaking/* ]] || [[ $BRANCH_NAME == major/* ]]; then
     RELEASE_NOTES="💥 **Breaking Change**
@@ -36,7 +36,7 @@ Type: Breaking change (MAJOR version bump)
 ⚠️ **This release contains breaking changes**
 
 ### Changes
-$(if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then git log --oneline $CURRENT_VERSION..HEAD; else git log --oneline; fi)"
+$(if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then git log --oneline "$CURRENT_VERSION..HEAD"; else git log --oneline; fi)"
 
 else
     RELEASE_NOTES="📦 **Release**
@@ -45,7 +45,7 @@ Branch: \`$BRANCH_NAME\`
 Type: General update (PATCH version bump)
 
 ### Changes
-$(if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then git log --oneline $CURRENT_VERSION..HEAD; else git log --oneline; fi)"
+$(if git rev-parse "$CURRENT_VERSION" >/dev/null 2>&1; then git log --oneline "$CURRENT_VERSION..HEAD"; else git log --oneline; fi)"
 fi
 
 # Create tag

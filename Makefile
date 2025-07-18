@@ -8,11 +8,11 @@ help:
 	@echo "  lint         - Run Python linting (ruff)"
 	@echo "  format       - Format Python code (ruff)"
 	@echo "  format-check - Check Python formatting"
-	@echo "  tf-fmt       - Format Terraform files"
-	@echo "  tf-fmt-check - Check Terraform formatting"
-	@echo "  tf-lint      - Run Terraform linting (tflint)"
-	@echo "  tf-validate  - Validate Terraform configuration"
-	@echo "  tf-init      - Initialize Terraform"
+	@echo "  tf-fmt       - Format OpenTofu files"
+	@echo "  tf-fmt-check - Check OpenTofu formatting"
+	@echo "  tf-lint      - Run OpenTofu linting (tflint)"
+	@echo "  tf-validate  - Validate OpenTofu configuration"
+	@echo "  tf-init      - Initialize OpenTofu"
 	@echo "  docker-build - Build Docker image"
 	@echo "  docker-push  - Push Docker image to registry"
 	@echo "  clean        - Clean up temporary files"
@@ -37,21 +37,21 @@ format:
 format-check:
 	uv run ruff format --check .
 
-# Terraform targets
+# OpenTofu targets
 tf-fmt:
-	terraform fmt -recursive terraform/
+	tofu fmt -recursive terraform/
 
 tf-fmt-check:
-	terraform fmt -check -recursive terraform/
+	tofu fmt -check -recursive terraform/
 
 tf-lint:
 	cd terraform && tflint --init && tflint
 
 tf-validate:
-	cd terraform && terraform validate
+	cd terraform && tofu validate
 
 tf-init:
-	cd terraform && terraform init
+	cd terraform && tofu init
 
 # Docker targets
 docker-build:
@@ -61,13 +61,13 @@ docker-push: docker-build
 
 # Infrastructure targets
 infra-up:
-	cd terraform && terraform init && terraform apply -var-file="environments/local/local.tfvars" -auto-approve
+	cd terraform && tofu init && tofu apply -var-file="environments/local/local.tfvars" -auto-approve
 
 infra-down:
-	cd terraform && terraform destroy -var-file="environments/local/local.tfvars" -auto-approve
+	cd terraform && tofu destroy -var-file="environments/local/local.tfvars" -auto-approve
 
 infra-plan:
-	cd terraform && terraform plan -var-file="environments/local/local.tfvars"
+	cd terraform && tofu plan -var-file="environments/local/local.tfvars"
 
 # Spark job targets
 spark-submit:
