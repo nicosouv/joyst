@@ -1,0 +1,135 @@
+version: '3'
+
+vars:
+  CR_PAT: '{{.CR_PAT | default ""}}'
+  PWD: '{{.PWD | default "."}}'
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list-all
+
+  # Python tasks
+  install:
+    desc: Install Python dependencies
+    cmds:
+      - uv venv --python 3.10
+      - uv pip install -e .
+      - uv pip install ruff pytest
+
+  test:
+    desc: Run Python tests
+    cmds:
+      - uv run python -m pytest spark_jobs/tests/ -v
+
+  lint:
+    desc: Run Python linting (ruff)
+    cmds:
+      - uv run ruff check .
+
+  format:
+    desc: Format Python code (ruff)
+    cmds:
+      - uv run ruff format .
+
+  format-check:
+    desc: Check Python formatting
+    cmds:
+      - uv run ruff format --check .
+
+  # OpenTofu tasks
+  tf-fmt:
+    desc: Format OpenTofu files
+    cmds:
+      - tofu fmt -recursive tofu/
+
+  tf-fmt-check:
+    desc: Check OpenTofu formatting
+    cmds:
+      - tofu fmt -check -recursive tofu/
+
+  tf-lint:
+    desc: Run OpenTofu linting (tflint)
+    dir: tofu
+    cmds:
+      - tflint --init
+      - tflint
+
+  tf-validate:
+    desc: Validate OpenTofu configuration
+    dir: tofu
+    cmds:
+      - tofu validate
+
+  tf-init:
+    desc: Initialize OpenTofu
+    dir: tofu
+    cmds:
+      - tofu init
+
+  # Docker tasks
+  docker-build:
+    desc: Build Docker image
+    env:
+      CR_PAT: '{{.CR_PAT}}'
+    cmds:
+      - .infrastructure/build.sh spark
+
+  docker-push:
+    desc: Push Docker image to registry
+    deps: [ docker-build ]
+
+  # Infrastructure tasks
+  infra-up:
+    desc: Deploy complete infrastructure
+    dir: tofu
+    cmds:
+      - tofu init
+      - tofu apply -var-file="environments/local/local.tfvars" -auto-approve
+
+  infra-down:
+    desc: Destroy infrastructure
+    dir: tofu
+    cmds:
+      - tofu destroy -var-file="environments/local/local.tfvars"
+
+  infra-plan:
+    desc: Plan infrastructure changes
+    dir: tofu
+    cmds:
+      - tofu plan -var-file="environments/local/local.tfvars"
+
+  # Spark job tasks
+  spark-submit:
+    desc: Run Spark data processing job
+    cmds:
+      - |
+        docker run --rm \
+          -v {{.PWD}}:/opt/spark/work-dir \
+          ghcr.io/nicosouv/joyst-spark:latest \
+          spark-submit --master spark://joyst-spark-master-local:7077 spark_jobs/src/steam_job.py
+
+  # Utility tasks
+  clean:
+    desc: Clean up temporary files
+    cmds:
+      - find . -type f -name "*.pyc" -delete
+      - find . -type d -name "__pycache__" -delete
+      - find . -type d -name ".pytest_cache" -delete
+      - find . -type d -name "*.egg-info" -exec rm -rf {} +
+      - rm -rf .venv/
+      - rm -rf build/
+      - rm -rf dist/
+
+  all:
+    desc: Run all checks (format, lint, test)
+    deps: [ format-check, lint, test, tf-fmt-check, tf-validate ]
+
+  setup:
+    desc: Complete development environment setup
+    deps: [ install, tf-init ]
+    cmds:
+      - echo "Development environment setup complete!"
+      - echo "Run 'task urls' to see service URLs"
+      - echo "Run 'task --list' to see available commands"

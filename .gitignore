@@ -49,9 +49,9 @@ data/
 logs/
 
 # Database data directories
-terraform/postgres-data/
-terraform/clickhouse-data/
-terraform/metabase-data/
+tofu/postgres-data/
+tofu/clickhouse-data/
+tofu/metabase-data/
 
 # Docker
 .dockerignore

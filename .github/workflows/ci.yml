@@ -7,29 +7,29 @@ on:
     branches: [ main ]
 
 jobs:
-  terraform:
-    name: Terraform Format & Lint
+  opentofu:
+    name: OpenTofu Format & Lint
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
+    - name: Setup OpenTofu
+      uses: opentofu/setup-opentofu@v1
       with:
-        terraform_version: latest
+        tofu_version: 1.10.3
     
-    - name: Terraform Format Check
-      run: terraform fmt -check -recursive
-      working-directory: terraform
+    - name: OpenTofu Format Check
+      run: tofu fmt -check -recursive
+      working-directory: tofu
     
-    - name: Terraform Init
-      run: terraform init
-      working-directory: terraform
+    - name: OpenTofu Init
+      run: tofu init
+      working-directory: tofu
     
-    - name: Terraform Validate
-      run: terraform validate
-      working-directory: terraform
+    - name: OpenTofu Validate
+      run: tofu validate
+      working-directory: tofu
     
     - name: TFLint Setup
       uses: terraform-linters/setup-tflint@v4
@@ -38,11 +38,11 @@ jobs:
     
     - name: TFLint Init
       run: tflint --init
-      working-directory: terraform
+      working-directory: tofu
     
     - name: TFLint
       run: tflint
-      working-directory: terraform
+      working-directory: tofu
 
   python:
     name: Python Format & Lint
