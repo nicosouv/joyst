@@ -10,6 +10,8 @@ jobs:
     name: Branch-based Semantic Release
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
+    outputs:
+      new_release_published: ${{ steps.release_check.outputs.released }}
     
     steps:
     - uses: actions/checkout@v4
@@ -84,58 +86,16 @@ jobs:
     
     - name: Create release tag
       run: |
-        NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
-        BRANCH_NAME="${{ github.head_ref }}"
-        
-        # Create release notes based on branch type
-        if [[ $BRANCH_NAME == feat/* ]]; then
-          RELEASE_NOTES="🚀 **New Feature**
-
-Branch: \`$BRANCH_NAME\`
-Type: Feature addition (MINOR version bump)
-
-### Changes
-$(git log --oneline ${{ steps.current_version.outputs.current_version }}..HEAD)"
-        elif [[ $BRANCH_NAME == fix/* ]]; then
-          RELEASE_NOTES="🐛 **Bug Fix**
-
-Branch: \`$BRANCH_NAME\`
-Type: Bug fix (PATCH version bump)
-
-### Changes
-$(git log --oneline ${{ steps.current_version.outputs.current_version }}..HEAD)"
-        elif [[ $BRANCH_NAME == breaking/* ]] || [[ $BRANCH_NAME == major/* ]]; then
-          RELEASE_NOTES="💥 **Breaking Change**
-
-Branch: \`$BRANCH_NAME\`
-Type: Breaking change (MAJOR version bump)
-
-⚠️ **This release contains breaking changes**
-
-### Changes
-$(git log --oneline ${{ steps.current_version.outputs.current_version }}..HEAD)"
-        else
-          RELEASE_NOTES="📦 **Release**
-
-Branch: \`$BRANCH_NAME\`
-Type: General update (PATCH version bump)
-
-### Changes
-$(git log --oneline ${{ steps.current_version.outputs.current_version }}..HEAD)"
-        fi
-        
-        # Create tag
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
-        git push origin "$NEW_VERSION"
-        
-        # Create GitHub release
-        gh release create "$NEW_VERSION" \
-          --title "Release $NEW_VERSION" \
-          --notes "$RELEASE_NOTES"
+        ./.github/scripts/create-release.sh \
+          "${{ steps.current_version.outputs.current_version }}" \
+          "${{ steps.new_version.outputs.new_version }}" \
+          "${{ github.head_ref }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Set release output
+      id: release_check
+      run: echo "released=true" >> $GITHUB_OUTPUT
 
   docker-release:
     name: Build and Push Docker Image
