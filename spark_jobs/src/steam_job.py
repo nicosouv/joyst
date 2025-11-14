@@ -174,7 +174,7 @@ def process_steam_account_data(config_file: str = None) -> None:
 
     # Also save as JSON for backup/debugging
     for name, df in dataframes.items():
-        df.coalesce(1).write.mode("overwrite").json(f"{steam_config['output_path']}/{name}")
+        # df.coalesce(1).write.mode("overwrite").json(f"{steam_config['output_path']}/{name}")
         print(f"Backup saved: {name} to {steam_config['output_path']}/{name}")
 
     spark.stop()

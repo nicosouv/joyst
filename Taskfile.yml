@@ -106,9 +106,45 @@ tasks:
     cmds:
       - |
         docker run --rm \
+          --network joyst-local-net \
+          -e SPARK_MASTER=spark://joyst-spark-master-local:7077 \
+          -e SPARK_LOCAL_DIRS=/tmp/spark \
+          -v {{.PWD}}:/opt/spark/work-dir:ro \
+          ghcr.io/nicosouv/joyst-spark:latest \
+          spark-submit spark_jobs/src/steam_job.py
+
+  spark-dev:
+    desc: Run Spark job with local code (development mode)
+    cmds:
+      - echo "Running Spark job with local code changes..."
+      - |
+        docker run --rm \
+          --network joyst-local-net \
+          -e SPARK_MASTER=spark://joyst-spark-master-local:7077 \
+          -e POSTGRES_HOST=joyst-postgres-local \
+          -e CLICKHOUSE_HOST=joyst-clickhouse-local \
+          -e PYTHONPATH=/opt/spark/local:$PYTHONPATH \
+          -e SPARK_LOCAL_DIRS=/tmp/spark \
+          -e JAVA_OPTS="-Djava.io.tmpdir=/tmp -Dspark.sql.warehouse.dir=/tmp/spark-warehouse" \
+          -v {{.PWD}}:/opt/spark/local:ro \
+          --tmpfs /tmp:exec \
+          ghcr.io/nicosouv/joyst-spark:latest \
+          spark-submit \
+          --conf spark.local.dir=/tmp/spark \
+          --conf spark.sql.warehouse.dir=/tmp/spark-warehouse \
+          --conf spark.sql.adaptive.enabled=false \
+          /opt/spark/local/spark_jobs/src/steam_job.py
+
+  spark-shell:
+    desc: Interactive Spark shell for development
+    cmds:
+      - |
+        docker run -it --rm \
+          --network joyst-local-net \
+          -e SPARK_MASTER=spark://joyst-spark-master-local:7077 \
           -v {{.PWD}}:/opt/spark/work-dir \
           ghcr.io/nicosouv/joyst-spark:latest \
-          spark-submit --master spark://joyst-spark-master-local:7077 spark_jobs/src/steam_job.py
+          pyspark
 
   # Utility tasks
   clean:
